@@ -38,6 +38,7 @@ app.post('/create_poll', (req: Request, res: Response) => {
         noVotes: 0,
         yesVotes: 0,
     };
+    res.status(200).json({ success: true });
 });
 
 app.post('/delete_poll', (req: Request, res: Response) => {
@@ -84,7 +85,7 @@ app.post('/register_voter', (req: Request, res: Response) => {
         return;
     }
     const result = registerVoter(user_address, signed_hash);
-    res.json(result);
+    res.json({id: result});
 });
 
 // API endpoint to cast a vote
@@ -123,6 +124,7 @@ app.post('/cast_vote', (req: Request, res: Response) => {
         return;
     }
     castVote(user_address, signed_hash, vote, id);
+    res.json({ success: true });
 });
 
 // Helper function to get vote status
