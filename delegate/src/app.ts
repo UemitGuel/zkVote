@@ -89,6 +89,16 @@ app.get('/vote_status/:user_address', (req: Request, res: Response) => {
             poll_question: pollQuestion,
             no_hash_to_sign: noHash,
             yes_hash_to_sign: yesHash,
+            deadlines: deadlineForEachStage,
+        });
+
+    } else if (voteStatus === "Ended") {
+        res.json({
+            vote_status: voteStatus,
+            poll_question: pollQuestion,
+            no_votes: currentPoll ? currentPoll.noVotes : 0,
+            yes_votes: currentPoll ? currentPoll.yesVotes : 0,
+            deadlines: deadlineForEachStage,
         });
     } else {
         res.json({
