@@ -8,117 +8,191 @@
 import SwiftUI
 import Combine
 import metamask_ios_sdk
+import Alamofire
 
 @MainActor
 struct SignView: View {
     @EnvironmentObject var metamaskSDK: MetaMaskSDK
-
+    
     @State var message = ""
-    @State private var showProgressView = false
+    @State var titleOfQuestion = ""
+    @State var otherResponse: OtherResponse?
+    @State var votedHash = ""
 
+    
+    @State private var showProgressView = false
+    
     @State var result: String = ""
     @State private var errorMessage = ""
     @State private var showError = false
     
     private let signButtonTitle = "Sign"
-    private let connectAndSignButtonTitle = "Connect & Sign"
     private static let appMetadata = AppMetadata(name: "Dub Dapp", url: "https://dubdapp.com")
-
+    
+    @State var state: StateEnum = .signToRegister
+    
+    enum StateEnum {
+        case signToRegister
+        case sendHTTPToRegister
+        case registeredWaitingForOthers
+        case youCanVote
+    }
+    
     var body: some View {
-        GeometryReader { geometry in
-            Form {
-                Section {
-                    Text("Message")
-                    TextEditor(text: $message)
-                        .frame(height: geometry.size.height / 2)
+        Form {
+            switch state {
+            case .signToRegister:
+                Text(titleOfQuestion)
+                Section(header: Text("Message")) {
+                    Text(message)
                 }
-
-                Section {
-                    Text("Result")
-                    TextEditor(text: $result)
-                        .frame(minHeight: 40)
+                Button {
+                    Task {
+                        await signInput()
+                    }
+                } label: {
+                    Text(signButtonTitle)
+                        .frame(maxWidth: .infinity, maxHeight: 32)
                 }
-
-                Section {
-                    ZStack {
-                        Button {
-                            Task {
-                                await signInput()
-                            }
-                        } label: {
-                            Text(signButtonTitle)
-                                .frame(maxWidth: .infinity, maxHeight: 32)
-                        }
-                        
-                        if showProgressView {
-                            ProgressView()
-                                .scaleEffect(1.5, anchor: .center)
-                                .progressViewStyle(CircularProgressViewStyle(tint: .black))
-                        }
+                .alert(isPresented: $showError) {
+                    Alert(
+                        title: Text("Error"),
+                        message: Text(errorMessage)
+                    )
+                }
+            case .sendHTTPToRegister:
+                Section(header: Text("Result")) {
+                    Text(result)
+                }
+                Button {
+                    showProgressView = true
+                    registerVote()
+                    state = .registeredWaitingForOthers
+                } label: {
+                    Text("Register Voting")
+                }
+            case .registeredWaitingForOthers:
+                Section(header: Text("Result")) {
+                    Text("You are registered. Waiting for the vote to start")
+                }
+                Button {
+                    showProgressView = true
+                    Task {
+                        await getVoteStatus()
                     }
-                    .alert(isPresented: $showError) {
-                        Alert(
-                            title: Text("Error"),
-                            message: Text(errorMessage)
-                        )
+                } label: {
+                    Text("Refresh")
+                }
+            case .youCanVote:
+                Section(header: Text("Result")) {
+                    Text("You can vote now!")
+                }
+                Button {
+                    showProgressView = true
+                    Task {
+                        await getVoteStatus()
                     }
+                } label: {
+                    Text("Sign Vote Yes")
+                }
+                Button {
+                    showProgressView = true
+                    Task {
+                        await getVoteStatus()
+                    }
+                } label: {
+                    Text("Sign Vote Yes")
                 }
             }
         }
         .onAppear {
+            showProgressView = true
             Task {
-                await getVoteStatus(userAddress: "0xd5fD5b9427FBCbA41339904E26a9649b813781C4")
+                await getVoteStatus()
                 showProgressView = false
             }
+        }
+        .redacted(reason: showProgressView ? .placeholder : [])
+    }
+    
+    func getVoteStatus() async {
+        guard let url = URL(string: "http://172.18.9.145:3000/vote_status/\(metamaskSDK.account)") else { return }
 
+        do {
+            let request = AF.request(url)
+            let data = try await request.serializingData().value
+
+            // Try decoding the response to different types based on some condition
+            if let pollResponse = try? decodePollResponse(from: data) {
+                // Handle PollResponse
+                print(pollResponse)
+                message = pollResponse.hashToSign
+                titleOfQuestion = pollResponse.pollQuestion
+            } else if let otherResponse = try? decodeOtherResponse(from: data) {
+                // Handle other response types
+                print(otherResponse)
+                self.otherResponse = otherResponse
+            } else {
+                // Fallback if no known type matches
+                print("Unknown response format")
+            }
+        } catch {
+            print("Error during request or JSON decoding: \(error)")
         }
     }
     
-    func getVoteStatus(userAddress: String) async {
-        guard let url = URL(string: "http://172.18.9.145:3000/vote_status/\(userAddress)") else { return }
-        var request = URLRequest(url: url)
-    
-        let (data, response) = try! await URLSession.shared.data(for: request)
-        print("response: \(response)")
-            print("data: \(data)")
-        let jsonDecoder = JSONDecoder()
-        
-        let responseJSON = try? JSONSerialization.jsonObject(with: data, options: [])
-        print("responseJSON \(responseJSON)")
-        
+    func decodePollResponse(from data: Data) throws -> PollResponse {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
-        do {
-           let pollResponse = try decoder.decode(PollResponse.self, from: data)
-           print(pollResponse)
-            message = pollResponse.hashToSign
-        } catch {
-           print("Error decoding JSON: \(error)")
-        }
+        return try decoder.decode(PollResponse.self, from: data)
+    }
 
-
-            // Handle response, data, and error
+    func decodeOtherResponse(from data: Data) throws -> OtherResponse {
+        let decoder = JSONDecoder()
+        return try decoder.decode(OtherResponse.self, from: data)
     }
     
     struct PollResponse: Decodable {
-       struct Deadlines: Decodable {
-           let registration: String
-           let voting: String
-       }
+        struct Deadlines: Decodable {
+            let registration: String
+            let voting: String
+        }
+        
+        let deadlines: Deadlines
+        let hashToSign: String
+        let pollQuestion: String
+        let voteStatus: String
+        
+        enum CodingKeys: String, CodingKey {
+            case deadlines
+            case hashToSign = "hash_to_sign"
+            case pollQuestion = "poll_question"
+            case voteStatus = "vote_status"
+        }
+    }
+    
+    struct OtherResponse: Decodable {
+        let voteStatus: String
+        let pollQuestion: String
+        let noHashToSign: String
+        let yesHashToSign: String
+        let deadlines: Deadlines
 
-       let deadlines: Deadlines
-       let hashToSign: String
-       let pollQuestion: String
-       let voteStatus: String
+        enum CodingKeys: String, CodingKey {
+            case voteStatus = "vote_status"
+            case pollQuestion = "poll_question"
+            case noHashToSign = "no_hash_to_sign"
+            case yesHashToSign = "yes_hash_to_sign"
+            case deadlines
+        }
 
-       enum CodingKeys: String, CodingKey {
-           case deadlines
-           case hashToSign = "hash_to_sign"
-           case pollQuestion = "poll_question"
-           case voteStatus = "vote_status"
-       }
+        struct Deadlines: Decodable {
+            let registration: String
+            let voting: String
+        }
     }
 
+    
     func signInput() async {
         let from = metamaskSDK.account
         let params: [String] = [from, message]
@@ -126,10 +200,6 @@ struct SignView: View {
             method: .personalSign,
             params: params
         )
-//        let signRequest = EthereumRequest(
-//            method: .ethSignTypedDataV4,
-//            params: params
-//        )
         
         showProgressView = true
         let requestResult = await metamaskSDK.request(signRequest2)
@@ -139,30 +209,61 @@ struct SignView: View {
         case let .success(value):
             result = value
             errorMessage = ""
+            state = .sendHTTPToRegister
         case let .failure(error):
             errorMessage = error.localizedDescription
             showError = true
         }
     }
     
-    func connectAndSign() async {
+    func registerVote() {
+        guard let url = URL(string: "http://172.18.9.145:3000/register_voter/") else { return }
+        
+        struct Login: Encodable {
+            let user_address: String
+            let signed_hash: String
+        }
+        
+        let login = Login(user_address: metamaskSDK.account, signed_hash: result)
+        
+        AF.request(url,
+                   method: .post,
+                   parameters: login,
+                   encoder: JSONParameterEncoder.default).response { response in
+            debugPrint(response)
+        }
+        showProgressView = false
+    }
+    
+    func signInput(yes: Bool) async {
+        let from = metamaskSDK.account
+        var params: [String] = []
+        guard let response = otherResponse else { return }
+        if yes {
+            params = [from, response.yesHashToSign]
+        } else {
+            params = [from, response.noHashToSign]
+
+        }
+        let signRequest2 = EthereumRequest(
+            method: .personalSign,
+            params: params
+        )
+        
         showProgressView = true
-        let connectSignResult = await metamaskSDK.connectAndSign(message: message)
+        let requestResult = await metamaskSDK.request(signRequest2)
         showProgressView = false
         
-        switch connectSignResult {
+        switch requestResult {
         case let .success(value):
             result = value
             errorMessage = ""
+            state = .sendHTTPToRegister
         case let .failure(error):
             errorMessage = error.localizedDescription
             showError = true
         }
     }
-}
-
-struct SignView_Previews: PreviewProvider {
-    static var previews: some View {
-        SignView()
-    }
+    
+    
 }

@@ -15,6 +15,7 @@
 		B62755EB2B08A9E700244379 /* RegisteredForVote.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62755EA2B08A9E700244379 /* RegisteredForVote.swift */; };
 		B62755FB2B08D1B100244379 /* metamask-ios-sdk in Frameworks */ = {isa = PBXBuildFile; productRef = B62755FA2B08D1B100244379 /* metamask-ios-sdk */; };
 		B62755FD2B08D28000244379 /* SignView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62755FC2B08D28000244379 /* SignView.swift */; };
+		B6F21DD02B08F37C001AC543 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = B6F21DCF2B08F37C001AC543 /* Alamofire */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -35,6 +36,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B62755FB2B08D1B100244379 /* metamask-ios-sdk in Frameworks */,
+				B6F21DD02B08F37C001AC543 /* Alamofire in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -98,6 +100,7 @@
 			name = zkVote;
 			packageProductDependencies = (
 				B62755FA2B08D1B100244379 /* metamask-ios-sdk */,
+				B6F21DCF2B08F37C001AC543 /* Alamofire */,
 			);
 			productName = zkVote;
 			productReference = B62755962B089CFB00244379 /* zkVote.app */;
@@ -129,6 +132,7 @@
 			mainGroup = B627558D2B089CFB00244379;
 			packageReferences = (
 				B62755F92B08D1B100244379 /* XCRemoteSwiftPackageReference "metamask-ios-sdk" */,
+				B6F21DCE2B08F37C001AC543 /* XCRemoteSwiftPackageReference "Alamofire" */,
 			);
 			productRefGroup = B62755972B089CFB00244379 /* Products */;
 			projectDirPath = "";
@@ -389,6 +393,14 @@
 				minimumVersion = 0.3.1;
 			};
 		};
+		B6F21DCE2B08F37C001AC543 /* XCRemoteSwiftPackageReference "Alamofire" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Alamofire/Alamofire";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.8.1;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -396,6 +408,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = B62755F92B08D1B100244379 /* XCRemoteSwiftPackageReference "metamask-ios-sdk" */;
 			productName = "metamask-ios-sdk";
+		};
+		B6F21DCF2B08F37C001AC543 /* Alamofire */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B6F21DCE2B08F37C001AC543 /* XCRemoteSwiftPackageReference "Alamofire" */;
+			productName = Alamofire;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
