@@ -54,13 +54,14 @@ export const genPublicKeyAndProof = async (userAddress) => {
         ]
     }
 
-    const hash = hashFunctionArguments(userAddress, dummyPublicKey, dummyPublicKeyProof.a, dummyPublicKeyProof.b, dummyPublicKeyProof.c);
+    // const hash = hashFunctionArguments(userAddress, dummyPublicKey, dummyPublicKeyProof.a, dummyPublicKeyProof.b, dummyPublicKeyProof.c);
+    const dummyHash = ethers.utils.keccak256("0x2234567890123456789012345678901234567890123456789012345678901234")
 
     return {
         privateKey: dummyPrivateKey,
         publicKey: dummyPublicKey,
         publicKeyProof: dummyPublicKeyProof,
-        hash
+        hash: dummyHash,
     }
 }
 
@@ -121,12 +122,14 @@ export const genEncryptedVoteAndProof = async (userAddress, publicKeyX, publicKe
         ]
     }
 
-    const hash = hashFunctionArguments(userAddress, dummyEncryptedVote, dummyEncryptedVoteProof.a, dummyEncryptedVoteProof.b, dummyEncryptedVoteProof.c);
+    // const hash = hashFunctionArguments(userAddress, dummyEncryptedVote, dummyEncryptedVoteProof.a, dummyEncryptedVoteProof.b, dummyEncryptedVoteProof.c);
+    // dummyHash is just random 32 bytes
+    const dummyHash = ethers.utils.keccak256("0x1234567890123456789012345678901234567890123456789012345678901234")
 
     return {
         encryptedVote: dummyEncryptedVote,
         encryptedVoteProof: dummyEncryptedVoteProof,
-        hash
+        hash: dummyHash,
     }
 }
 
