@@ -15,6 +15,8 @@
 		B62755EB2B08A9E700244379 /* RegisteredForVote.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62755EA2B08A9E700244379 /* RegisteredForVote.swift */; };
 		B62755FB2B08D1B100244379 /* metamask-ios-sdk in Frameworks */ = {isa = PBXBuildFile; productRef = B62755FA2B08D1B100244379 /* metamask-ios-sdk */; };
 		B62755FD2B08D28000244379 /* SignView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62755FC2B08D28000244379 /* SignView.swift */; };
+		B62E60102B094CB700A9D2E4 /* Web3Modal in Frameworks */ = {isa = PBXBuildFile; productRef = B62E600F2B094CB700A9D2E4 /* Web3Modal */; };
+		B62E60122B094CB700A9D2E4 /* Web3ModalUI in Frameworks */ = {isa = PBXBuildFile; productRef = B62E60112B094CB700A9D2E4 /* Web3ModalUI */; };
 		B6F21DD02B08F37C001AC543 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = B6F21DCF2B08F37C001AC543 /* Alamofire */; };
 /* End PBXBuildFile section */
 
@@ -35,8 +37,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B62E60102B094CB700A9D2E4 /* Web3Modal in Frameworks */,
 				B62755FB2B08D1B100244379 /* metamask-ios-sdk in Frameworks */,
 				B6F21DD02B08F37C001AC543 /* Alamofire in Frameworks */,
+				B62E60122B094CB700A9D2E4 /* Web3ModalUI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -101,6 +105,8 @@
 			packageProductDependencies = (
 				B62755FA2B08D1B100244379 /* metamask-ios-sdk */,
 				B6F21DCF2B08F37C001AC543 /* Alamofire */,
+				B62E600F2B094CB700A9D2E4 /* Web3Modal */,
+				B62E60112B094CB700A9D2E4 /* Web3ModalUI */,
 			);
 			productName = zkVote;
 			productReference = B62755962B089CFB00244379 /* zkVote.app */;
@@ -133,6 +139,7 @@
 			packageReferences = (
 				B62755F92B08D1B100244379 /* XCRemoteSwiftPackageReference "metamask-ios-sdk" */,
 				B6F21DCE2B08F37C001AC543 /* XCRemoteSwiftPackageReference "Alamofire" */,
+				B62E600E2B094CB700A9D2E4 /* XCRemoteSwiftPackageReference "web3modal-swift" */,
 			);
 			productRefGroup = B62755972B089CFB00244379 /* Products */;
 			projectDirPath = "";
@@ -393,6 +400,14 @@
 				minimumVersion = 0.3.1;
 			};
 		};
+		B62E600E2B094CB700A9D2E4 /* XCRemoteSwiftPackageReference "web3modal-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/WalletConnect/web3modal-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.10;
+			};
+		};
 		B6F21DCE2B08F37C001AC543 /* XCRemoteSwiftPackageReference "Alamofire" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Alamofire/Alamofire";
@@ -408,6 +423,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = B62755F92B08D1B100244379 /* XCRemoteSwiftPackageReference "metamask-ios-sdk" */;
 			productName = "metamask-ios-sdk";
+		};
+		B62E600F2B094CB700A9D2E4 /* Web3Modal */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B62E600E2B094CB700A9D2E4 /* XCRemoteSwiftPackageReference "web3modal-swift" */;
+			productName = Web3Modal;
+		};
+		B62E60112B094CB700A9D2E4 /* Web3ModalUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B62E600E2B094CB700A9D2E4 /* XCRemoteSwiftPackageReference "web3modal-swift" */;
+			productName = Web3ModalUI;
 		};
 		B6F21DCF2B08F37C001AC543 /* Alamofire */ = {
 			isa = XCSwiftPackageProductDependency;

@@ -65,7 +65,7 @@ struct ConnectView: View {
                 if !metaMaskSDK.account.isEmpty {
                     Section {
                         Group {
-                            NavigationLink("Sign") {
+                            NavigationLink("Vote available") {
                                 SignView().environmentObject(metaMaskSDK)
                             }
                         }
@@ -80,8 +80,9 @@ struct ConnectView: View {
                                     await connectSDK()
                                 }
                             } label: {
-                                Text("Connect to MetaMask")
-                                    .frame(maxWidth: .infinity, maxHeight: 32)
+                                Image("metamask")
+                                    .resizable()
+                                    .frame(width: 252, height: 80)
                             }
 
                             if showProgressView {
@@ -101,29 +102,30 @@ struct ConnectView: View {
                     }
                 }
                 
-                if !metaMaskSDK.account.isEmpty {
-                    Section {
-                        Button {
-                            metaMaskSDK.clearSession()
-                        } label: {
-                            Text("Clear Session")
-                                .frame(maxWidth: .infinity, maxHeight: 32)
-                        }
-                        
-                        Button {
-                            metaMaskSDK.disconnect()
-                        } label: {
-                            Text("Disconnect")
-                                .frame(maxWidth: .infinity, maxHeight: 32)
-                        }
-                    }
-                }
+//                if !metaMaskSDK.account.isEmpty {
+//                    Section {
+//                        Button {
+//                            metaMaskSDK.clearSession()
+//                        } label: {
+//                            Text("Clear Session")
+//                                .frame(maxWidth: .infinity, maxHeight: 32)
+//                        }
+//                        
+//                        Button {
+//                            metaMaskSDK.disconnect()
+//                        } label: {
+//                            Text("Disconnect")
+//                                .frame(maxWidth: .infinity, maxHeight: 32)
+//                        }
+//                    }
+//                }
             }
             .font(.body)
             .onReceive(NotificationCenter.default.publisher(for: .Connection)) { notification in
                 status = notification.userInfo?["value"] as? String ?? "Offline"
             }
-            .navigationTitle("Dub Dapp")
+            .navigationTitle("zkVote")
+            .navigationBarTitleDisplayMode(.large)
             .onAppear {
                 showProgressView = false
             }

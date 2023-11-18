@@ -9,6 +9,7 @@ import SwiftUI
 import Combine
 import metamask_ios_sdk
 import Alamofire
+import Web3Modal
 
 @MainActor
 struct SignView: View {
@@ -28,7 +29,6 @@ struct SignView: View {
     @State private var errorMessage = ""
     @State private var showError = false
     
-    private let signButtonTitle = "Sign"
     private static let appMetadata = AppMetadata(name: "Dub Dapp", url: "https://dubdapp.com")
     
     @State var state: StateEnum = .signToRegister
@@ -46,8 +46,10 @@ struct SignView: View {
         Form {
             switch state {
             case .signToRegister:
-                Text(titleOfQuestion)
-                Section(header: Text("Message")) {
+                Section(header: Text("Voting Question")) {
+                    Text(titleOfQuestion)
+                }
+                Section(header: Text("Registration Message")) {
                     Text(message)
                 }
                 Button {
@@ -55,7 +57,7 @@ struct SignView: View {
                         await signInput()
                     }
                 } label: {
-                    Text(signButtonTitle)
+                    Text("Register for vote")
                         .frame(maxWidth: .infinity, maxHeight: 32)
                 }
                 .alert(isPresented: $showError) {
@@ -65,7 +67,7 @@ struct SignView: View {
                     )
                 }
             case .sendHTTPToRegister:
-                Section(header: Text("Result")) {
+                Section(header: Text("This signed hash keeps the vote safe")) {
                     Text(result)
                 }
                 Button {
@@ -73,12 +75,10 @@ struct SignView: View {
                     registerVote()
                     state = .registeredWaitingForOthers
                 } label: {
-                    Text("Register Voting")
+                    Text("Register for Voting")
                 }
             case .registeredWaitingForOthers:
-                Section(header: Text("Result")) {
-                    Text("You are registered. Waiting for the vote to start")
-                }
+                Text("You are registered. Waiting for the vote to start")
                 Button {
                     showProgressView = true
                     Task {
@@ -121,8 +121,8 @@ struct SignView: View {
                 }
             case .showTheEndResults:
                 Section(header: Text("Result")) {
-                    Text("Yes votes: 3")
-                    Text("No votes: 2")
+                    Text("Yes votes: \(endedPollResponse?.yesVotes.description)")
+                    Text("No votes: \(endedPollResponse?.noVotes.description)")
                 }
             }
         }
@@ -244,7 +244,7 @@ struct SignView: View {
     
     func signInput() async {
         let from = metamaskSDK.account
-        let params: [String] = [from, message]
+        let params: [String] = [from, message.data(using: .utf8)!.toHexString()]
         let signRequest2 = EthereumRequest(
             method: .personalSign,
             params: params
@@ -291,7 +291,7 @@ struct SignView: View {
         var params: [String] = []
         guard let response = otherResponse else { return }
         if yes {
-            params = [from, response.yesHashToSign]
+            params = [from, response.yesHashToSign.data(using: .utf8)!.toHexString()]
         } else {
             params = [from, response.noHashToSign]
 
