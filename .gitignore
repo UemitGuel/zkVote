@@ -51,3 +51,7 @@ Thumbs.db
 .idea/
 *.sln
 *.swiftpm/
+
+# Node.js
+node_modules
+dist
