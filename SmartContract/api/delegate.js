@@ -3,6 +3,7 @@ const {
     genEncryptedVotesAndProofs,
 } = require('../helper/voters')
 
+const { hashFunctionArguments } = require('./ERC4337.js')
 const { MerkleTree } = require('../helper/merkletree.js')
 
 // return Promise<string[]>
@@ -27,7 +28,7 @@ export const genMerkleProof = (userAddress) => {
         }
 */
 const ZK_SNARK_PROOF_TIME = 3000
-export const genPublicKeyAndProof = async () => {
+export const genPublicKeyAndProof = async (userAddress) => {
     // const { privateKey, publicKey, publicKeyProof } = (await genPublicKeysAndProofs(1))[0]
     await new Promise(r => setTimeout(r, ZK_SNARK_PROOF_TIME));
     const dummyPrivateKey = "2736030358979909402780800718157159386076813972158567259200215660948447369250"
@@ -53,16 +54,19 @@ export const genPublicKeyAndProof = async () => {
         ]
     }
 
+    const hash = hashFunctionArguments(userAddress, dummyPublicKey, dummyPublicKeyProof.a, dummyPublicKeyProof.b, dummyPublicKeyProof.c);
+
     return {
         privateKey: dummyPrivateKey,
         publicKey: dummyPublicKey,
-        publicKeyProof: dummyPublicKeyProof
+        publicKeyProof: dummyPublicKeyProof,
+        hash
     }
 }
 
 // returns Idx
 const TX_TIME = 3000
-export const register = async (userAddress, publicKey, publicKeyProof, _merkleProof) => {
+export const register = async (userAddress, publicKey, publicKeyProof, _merkleProof, signature) => {
     // return eVoteInstance.register(publicKey, publicKeyProof.a, publicKeyProof.b, publicKeyProof.c, _merkleProof, { from: accounts[i + 1] })
     await new Promise(r => setTimeout(r, TX_TIME));
     return 2
@@ -81,7 +85,7 @@ encryptedVoteProof : {
         }
 */
 
-export const genEncryptedVoteAndProof = async (publicKeyX, publicKeyY, Idx, privateKey, Vote) => {
+export const genEncryptedVoteAndProof = async (userAddress, publicKeyX, publicKeyY, Idx, privateKey, Vote) => {
     const voters = [{
         publicKey: [publicKeyX, publicKeyY],
         Idx: Idx,
@@ -117,14 +121,17 @@ export const genEncryptedVoteAndProof = async (publicKeyX, publicKeyY, Idx, priv
         ]
     }
 
+    const hash = hashFunctionArguments(userAddress, dummyEncryptedVote, dummyEncryptedVoteProof.a, dummyEncryptedVoteProof.b, dummyEncryptedVoteProof.c);
+
     return {
         encryptedVote: dummyEncryptedVote,
-        encryptedVoteProof: dummyEncryptedVoteProof
+        encryptedVoteProof: dummyEncryptedVoteProof,
+        hash
     }
 }
 
 // returns Promise<tx>
-export const castVote = async (userAddress, encryptedVote, Idx, encryptedVoteProof) => {
+export const castVote = async (userAddress, encryptedVote, Idx, encryptedVoteProof, signature) => {
     // return eVoteInstance.castVote(encryptedVote, Idx, encryptedVoteProof.a, encryptedVoteProof.b, encryptedVoteProof.c, { from: accounts[i + 1] })
     await new Promise(r => setTimeout(r, TX_TIME));
     return {}
