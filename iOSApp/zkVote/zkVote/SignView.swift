@@ -18,6 +18,7 @@ struct SignView: View {
     @State var titleOfQuestion = ""
     @State var otherResponse: OtherResponse?
     @State var votedHash = ""
+    @State var vote = ""
 
     
     @State private var showProgressView = false
@@ -36,6 +37,7 @@ struct SignView: View {
         case sendHTTPToRegister
         case registeredWaitingForOthers
         case youCanVote
+        case hasVotedWaitingForResults
     }
     
     var body: some View {
@@ -90,7 +92,7 @@ struct SignView: View {
                 Button {
                     showProgressView = true
                     Task {
-                        await getVoteStatus()
+                        await signVote(yes: true)
                     }
                 } label: {
                     Text("Sign Vote Yes")
@@ -98,10 +100,22 @@ struct SignView: View {
                 Button {
                     showProgressView = true
                     Task {
+                        await signVote(yes: false)
+                    }
+                } label: {
+                    Text("Sign Vote No")
+                }
+            case .hasVotedWaitingForResults:
+                Section(header: Text("Result")) {
+                    Text("You voted \(vote). Waiting for the vote to end")
+                }
+                Button {
+                    showProgressView = true
+                    Task {
                         await getVoteStatus()
                     }
                 } label: {
-                    Text("Sign Vote Yes")
+                    Text("Refresh")
                 }
             }
         }
@@ -136,6 +150,7 @@ struct SignView: View {
                 // Fallback if no known type matches
                 print("Unknown response format")
             }
+            showProgressView = false
         } catch {
             print("Error during request or JSON decoding: \(error)")
         }
@@ -235,7 +250,8 @@ struct SignView: View {
         showProgressView = false
     }
     
-    func signInput(yes: Bool) async {
+    // VOTE
+    func signVote(yes: Bool) async {
         let from = metamaskSDK.account
         var params: [String] = []
         guard let response = otherResponse else { return }
@@ -256,13 +272,36 @@ struct SignView: View {
         
         switch requestResult {
         case let .success(value):
-            result = value
+            votedHash = value
             errorMessage = ""
+            castVote()
             state = .sendHTTPToRegister
         case let .failure(error):
             errorMessage = error.localizedDescription
             showError = true
         }
+    }
+    
+    func castVote() {
+        guard let url = URL(string: "http://172.18.9.145:3000/cast_vote/") else { return }
+        
+        struct CastVote: Encodable {
+            let user_address: String
+            let signed_hash: String
+            let vote: String
+            let id: String
+        }
+        
+        let castVote = CastVote(user_address: metamaskSDK.account, signed_hash: result, vote: "Yes", id: "1")
+        
+        AF.request(url,
+                   method: .post,
+                   parameters: castVote,
+                   encoder: JSONParameterEncoder.default).response { response in
+            debugPrint(response)
+        }
+        state = .hasVotedWaitingForResults
+        showProgressView = false
     }
     
     
