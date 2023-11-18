@@ -7,7 +7,7 @@ contract HashingHelper {
     // Solidity function to create the same hash as in the JavaScript code
     function formatAndHashMessage(
         bytes32 message
-    ) public view returns (bytes32 hashedMessage) {
+    ) public pure returns (bytes32 hashedMessage) {
         assembly {
             mstore(0x00, "\x19Ethereum Signed Message:\n32")
             mstore(0x1c, message)
@@ -21,7 +21,7 @@ contract HashingHelper {
         uint[2] memory proof_a,
         uint[2][2] memory proof_b,
         uint[2] memory proof_c
-    ) public view returns (bytes32 hashedMessage) {
+    ) public pure returns (bytes32 hashedMessage) {
         bytes32 senderInBytes = bytes20(sender);
         uint _pubKey0 = _pubKey[0];
         uint _pubKey1 = _pubKey[1];
@@ -56,10 +56,10 @@ contract HashingHelper {
         uint[2][2] memory proof_b,
         uint[2] memory proof_c,
         uint _Idx
-    ) public view returns (bytes32 hashedMessage) {
+    ) public pure returns (bytes32 hashedMessage) {
         bytes32 senderInBytes = bytes20(sender);
-        uint _encryptedVote0 = _pubKey[0];
-        uint _EncryptedVote1 = _pubKey[1];
+        uint _encryptedVote0 = _encryptedVote[0];
+        uint _encryptedVote1 = _encryptedVote[1];
         uint proof_a0 = proof_a[0];
         uint proof_a1 = proof_a[1];
         uint proof_b00 = proof_b[0][0];
@@ -70,8 +70,8 @@ contract HashingHelper {
         uint proof_c1 = proof_c[1];
         assembly {
             mstore(0x05E0, senderInBytes)
-            mstore(0x0600, _pubKey0)
-            mstore(0x0620, _pubKey1)
+            mstore(0x0600, _encryptedVote0)
+            mstore(0x0620, _encryptedVote1)
             mstore(0x0640, proof_a0)
             mstore(0x0660, proof_a1)
             mstore(0x0680, proof_b00)
@@ -90,7 +90,7 @@ contract HashingHelper {
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) public view returns (address recovered) {
+    ) public pure returns (address recovered) {
         recovered = ECDSA.recover(hashedMessage, v, r, s);
     }
 }
