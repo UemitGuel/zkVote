@@ -7,5 +7,5 @@ We are reusing the voting protocol from [zkSNARK-Open-Vote-Network](https://gith
 
 Project strucutre:
 - `SmartContract`: contains the OVN smart contracts and the zkSNARK circuits.
-- `Delegate`: contains the iOS app delegate (the iOS companion app that should be merged into the native iOS app in the future)
+- `delegate`: contains the iOS app delegate (the iOS companion app that should be merged into the native iOS app in the future)
 - `iOSApp`: contains the iOS app
