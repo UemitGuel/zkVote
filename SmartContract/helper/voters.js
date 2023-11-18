@@ -119,5 +119,9 @@ async function genTestData(length) {
     return res;
 }
 module.exports = {
-    genTestData
+    genTestData,
+    genPublicKeysAndProofs,
+    genEncryptedVotesAndProofs,
+    genPublicKey,
+    genEncryptedVote
 }
