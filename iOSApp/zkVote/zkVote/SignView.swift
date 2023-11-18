@@ -66,16 +66,57 @@ struct SignView: View {
             }
         }
         .onAppear {
-            updateMessage()
-            showProgressView = false
-        }
-        .onChange(of: metamaskSDK.chainId) { _ in
-            updateMessage()
+            Task {
+                await getVoteStatus(userAddress: "0xd5fD5b9427FBCbA41339904E26a9649b813781C4")
+                showProgressView = false
+            }
+
         }
     }
     
-    func updateMessage() {
-        message = "0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0"
+    func getVoteStatus(userAddress: String) async {
+        guard let url = URL(string: "http://172.18.9.145:3000/vote_status/\(userAddress)") else { return }
+        var request = URLRequest(url: url)
+    
+        let (data, response) = try! await URLSession.shared.data(for: request)
+        print("response: \(response)")
+            print("data: \(data)")
+        let jsonDecoder = JSONDecoder()
+        
+        let responseJSON = try? JSONSerialization.jsonObject(with: data, options: [])
+        print("responseJSON \(responseJSON)")
+        
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        do {
+           let pollResponse = try decoder.decode(PollResponse.self, from: data)
+           print(pollResponse)
+            message = pollResponse.hashToSign
+        } catch {
+           print("Error decoding JSON: \(error)")
+        }
+
+
+            // Handle response, data, and error
+    }
+    
+    struct PollResponse: Decodable {
+       struct Deadlines: Decodable {
+           let registration: String
+           let voting: String
+       }
+
+       let deadlines: Deadlines
+       let hashToSign: String
+       let pollQuestion: String
+       let voteStatus: String
+
+       enum CodingKeys: String, CodingKey {
+           case deadlines
+           case hashToSign = "hash_to_sign"
+           case pollQuestion = "poll_question"
+           case voteStatus = "vote_status"
+       }
     }
 
     func signInput() async {
