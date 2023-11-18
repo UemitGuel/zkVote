@@ -1,1 +1,12 @@
-test arturo
+Sign Process:
+Metamask's abstraction requires a specific structure for the message>
+It takes an arbitrary length input, and prepends "\u0019Ethereum Signed Message:\n${message.length}" to the message and then
+calculates the keccak256, and signs that message hash.
+
+For the smart contract verification, we will have to:
+> set a string "\u0019Ethereum Signed Message:\n32" with a fixed length of 32 bytes for the message length (since we are always going to be passing keccak256 hashes as msg) 
+> hash the function arguments to obtain the backend-message-hash(equal to what is inputed to the Metamask personal_sign function on the client)
+> concatenate the string with the hash and keccak256 it again to obtain the signed-message-hash
+> recover the address from the signed_message_hash and the signature provided as input, verifying the message comes from a valid participant
+
+
