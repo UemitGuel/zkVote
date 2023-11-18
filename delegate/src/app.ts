@@ -1,4 +1,5 @@
 import express, { Request, Response } from 'express';
+import {randomBytes, hexlify} from "ethers";
 
 const app = express();
 app.use(express.json());
@@ -55,7 +56,7 @@ app.get('/vote_status/:user_address', (req: Request, res: Response) => {
     const deadlineForEachStage = getDeadlineForStage();
 
     if(voteStatus === "CanRegister") {
-        const registrationHash = "0x1234567890";
+        const registrationHash = hexlify(randomBytes(32));
         res.json({
             vote_status: voteStatus,
             poll_question: pollQuestion,
@@ -63,8 +64,8 @@ app.get('/vote_status/:user_address', (req: Request, res: Response) => {
             deadlines: deadlineForEachStage,
         });
     } else if (voteStatus === "CanVote") {
-        const noHash = "0x1234567890";
-        const yesHash = "0x0987654321";
+        const noHash = hexlify(randomBytes(32));
+        const yesHash = hexlify(randomBytes(32));
         res.json({
             vote_status: voteStatus,
             poll_question: pollQuestion,
