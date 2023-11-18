@@ -2,6 +2,7 @@
 pragma solidity^0.8.0;
 import './verifier_MerkleTree.sol';
 import './verifier_zkSNARK.sol';
+import './hashingHelpers/HashingHelper.sol';
 
 contract eVote {
     verifierMerkleTree vMerkleProof;
@@ -39,30 +40,65 @@ contract eVote {
     }
 
     function register(
+            address sender,
+            uint8 v,
+            uint r,
+            uint s,
             uint[] memory _pubKey, 
             uint[2] memory proof_a, 
             uint[2][2] memory proof_b, 
             uint[2] memory proof_c, 
-            bytes32[] memory _merkleProof
+            bytes32[] memory _merkleProof,
+            
         ) public payable{
+ 
         require(block.number<finishRegistartionBlockNumber,"Registration phase is already closed");
         require(vzkSNARK.verifyProof(proof_a, proof_b, proof_c, _pubKey, 0),"Invalid DL proof");
-        if (publicKeys[msg.sender][0] == 0 && publicKeys[msg.sender][1] == 0){
+        checkRegistering(
+            sender,
+            v,
+            r,
+            s,
+            _pubKey, 
+            proof_a, 
+            proof_b, 
+            proof_c, 
+        );
+
+
+        if (publicKeys[sender][0] == 0 && publicKeys[sender][1] == 0){
             require(voters.length + 1 <= nVoters, "Max number of voters is reached");
-            require(vMerkleProof.verifyProof(_merkleProof, usersMerkleTreeRoot, keccak256(abi.encodePacked(msg.sender))), "Invalid Merkle proof");
-            voters.push(msg.sender);
+            require(vMerkleProof.verifyProof(_merkleProof, usersMerkleTreeRoot, keccak256(abi.encodePacked(sender))), "Invalid Merkle proof");
+            voters.push(sender);
         }
-        publicKeys[msg.sender] = [_pubKey[0], _pubKey[1]];
+        publicKeys[sender] = [_pubKey[0], _pubKey[1]];
     }
     function castVote(
-            uint[2] memory _encryptedVote, 
-            uint _Idx, 
-            uint[2] memory proof_a, 
-            uint[2][2] memory proof_b, 
-            uint[2] memory proof_c
+        address sender,
+        uint8 v,
+        uint r,
+        uint s,
+        uint[2] memory _encryptedVote, 
+        uint _Idx, 
+        uint[2] memory proof_a, 
+        uint[2][2] memory proof_b, 
+        uint[2] memory proof_c
         ) public {
         require(block.number >= finishRegistartionBlockNumber && block.number < finishVotingBlockNumber, "Voting phase is already closed");
-        require( msg.sender == voters[_Idx], "Unregistered voter");
+        require(sender == voters[_Idx], "Unregistered voter");
+ 
+        checkVoting(
+            sender,
+            v,
+            r,
+            s,
+            _encryptedVote, 
+            _Idx, 
+            proof_a, 
+            proof_b, 
+            proof_c
+            );
+        
         uint[] memory _publicSignals = new uint[](nVoters + 3);
         _publicSignals[0] = _encryptedVote[0];
         _publicSignals[1] = _encryptedVote[1];
@@ -78,7 +114,7 @@ contract eVote {
         
         require(vzkSNARK.verifyProof(proof_a, proof_b, proof_c, _publicSignals, 1),"Invalid encrypted vote");
 
-        encryptedVotes[msg.sender] = _encryptedVote;
+        encryptedVotes[sender] = _encryptedVote;
 
         if (_encryptedVote[0] >= pm1d2){
             encryptedVotesXsign[_Idx/253] ^= 1<<(_Idx%253);
@@ -115,6 +151,59 @@ contract eVote {
         require(block.number >= finishTallyBlockNumber, "Invalid reclaim deposit phase");
         require(refunded[msg.sender] == false && (encryptedVotes[msg.sender][0] != 0 || msg.sender == admin),"Illegal reclaim");
         refunded[msg.sender] = true;
+    }
+
+
+    function checkRegistering(
+            address sender,
+            uint8 v,
+            uint r,
+            uint s,
+            uint[] memory _pubKey, 
+            uint[2] memory proof_a, 
+            uint[2][2] memory proof_b, 
+            uint[2] memory proof_c, 
+    ) public view returns(bool) {
+        
+                
+        bytes32 inputMessageHash = Decoder.hashRegisterArguments(
+            sender,
+            _pubKey, 
+            proof_a, 
+            proof_b, 
+            proof_c)
+
+        bytes32 formattedMessageHash = Decoder.formatAndHashMessage(inputMessageHash);
+        require(sender == Decoder.recoverSigner(formattedMessageHash, v , r , s))
+
+        return true
+    }
+
+
+    function checkVoting(
+            address sender,
+            uint8 v,
+            uint r,
+            uint s,
+            uint[2] memory _encryptedVote, 
+            uint _Idx, 
+            uint[2] memory proof_a, 
+            uint[2][2] memory proof_b, 
+            uint[2] memory proof_c
+        ) public view returns(bool) {
+        
+        
+        bytes32 inputMessageHash = Decoder.hashVoteArguments(
+            sender,
+            _encryptedVote, 
+            proof_a, 
+            proof_b, 
+            proof_c,
+            _Idx)
+        bytes32 formattedMessageHash = Decoder.formatAndHashMessage(inputMessageHash);
+        require(sender == Decoder.recoverSigner(formattedMessageHash, v , r , s));
+
+        return true
     }
     
 }
