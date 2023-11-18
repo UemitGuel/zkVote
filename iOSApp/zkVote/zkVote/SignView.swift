@@ -17,6 +17,7 @@ struct SignView: View {
     @State var message = ""
     @State var titleOfQuestion = ""
     @State var otherResponse: OtherResponse?
+    @State var endedPollResponse: EndedPollResponse?
     @State var votedHash = ""
     @State var vote = ""
 
@@ -38,6 +39,7 @@ struct SignView: View {
         case registeredWaitingForOthers
         case youCanVote
         case hasVotedWaitingForResults
+        case showTheEndResults
     }
     
     var body: some View {
@@ -117,6 +119,11 @@ struct SignView: View {
                 } label: {
                     Text("Refresh")
                 }
+            case .showTheEndResults:
+                Section(header: Text("Result")) {
+                    Text("Yes votes: 3")
+                    Text("No votes: 2")
+                }
             }
         }
         .onAppear {
@@ -143,9 +150,16 @@ struct SignView: View {
                 message = pollResponse.hashToSign
                 titleOfQuestion = pollResponse.pollQuestion
             } else if let otherResponse = try? decodeOtherResponse(from: data) {
-                // Handle other response types
+                // Handle OtherResponse
                 print(otherResponse)
                 self.otherResponse = otherResponse
+                state = .youCanVote
+            } else if let endedPollResponse = try? decodeEndedPollResponse(from: data) {
+                // Handle EndedPollResponse
+                print(endedPollResponse)
+                self.endedPollResponse = endedPollResponse
+                state = .showTheEndResults
+                // Add logic here to handle the ended poll response
             } else {
                 // Fallback if no known type matches
                 print("Unknown response format")
@@ -165,6 +179,11 @@ struct SignView: View {
     func decodeOtherResponse(from data: Data) throws -> OtherResponse {
         let decoder = JSONDecoder()
         return try decoder.decode(OtherResponse.self, from: data)
+    }
+    
+    func decodeEndedPollResponse(from data: Data) throws -> EndedPollResponse {
+        let decoder = JSONDecoder()
+        return try decoder.decode(EndedPollResponse.self, from: data)
     }
     
     struct PollResponse: Decodable {
@@ -191,13 +210,27 @@ struct SignView: View {
         let pollQuestion: String
         let noHashToSign: String
         let yesHashToSign: String
-        let deadlines: Deadlines
 
         enum CodingKeys: String, CodingKey {
             case voteStatus = "vote_status"
             case pollQuestion = "poll_question"
             case noHashToSign = "no_hash_to_sign"
             case yesHashToSign = "yes_hash_to_sign"
+        }
+    }
+    
+    struct EndedPollResponse: Decodable {
+        let voteStatus: String
+        let pollQuestion: String
+        let noVotes: Int
+        let yesVotes: Int
+        let deadlines: Deadlines
+
+        enum CodingKeys: String, CodingKey {
+            case voteStatus = "vote_status"
+            case pollQuestion = "poll_question"
+            case noVotes = "no_votes"
+            case yesVotes = "yes_votes"
             case deadlines
         }
 
@@ -207,6 +240,7 @@ struct SignView: View {
         }
     }
 
+
     
     func signInput() async {
         let from = metamaskSDK.account
@@ -215,6 +249,7 @@ struct SignView: View {
             method: .personalSign,
             params: params
         )
+        print(signRequest2)
         
         showProgressView = true
         let requestResult = await metamaskSDK.request(signRequest2)
@@ -275,7 +310,6 @@ struct SignView: View {
             votedHash = value
             errorMessage = ""
             castVote()
-            state = .sendHTTPToRegister
         case let .failure(error):
             errorMessage = error.localizedDescription
             showError = true
