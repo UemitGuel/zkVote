@@ -1,4 +1,5 @@
 import express, { Request, Response } from 'express';
+import {randomBytes, hexlify} from "ethers";
 
 const app = express();
 app.use(express.json());
@@ -54,11 +55,30 @@ app.get('/vote_status/:user_address', (req: Request, res: Response) => {
     // Replace this with your actual logic to get the deadline for each stage
     const deadlineForEachStage = getDeadlineForStage();
 
-    res.json({
-        vote_status: voteStatus,
-        poll_question: pollQuestion,
-        deadlines: deadlineForEachStage,
-    });
+    if(voteStatus === "CanRegister") {
+        const registrationHash = hexlify(randomBytes(32));
+        res.json({
+            vote_status: voteStatus,
+            poll_question: pollQuestion,
+            hash_to_sign: registrationHash,
+            deadlines: deadlineForEachStage,
+        });
+    } else if (voteStatus === "CanVote") {
+        const noHash = hexlify(randomBytes(32));
+        const yesHash = hexlify(randomBytes(32));
+        res.json({
+            vote_status: voteStatus,
+            poll_question: pollQuestion,
+            no_hash_to_sign: noHash,
+            yes_hash_to_sign: yesHash,
+        });
+    } else {
+        res.json({
+            vote_status: voteStatus,
+            poll_question: pollQuestion,
+            deadlines: deadlineForEachStage,
+        });
+    }
 });
 
 // API endpoint to register a voter
