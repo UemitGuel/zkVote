@@ -17,7 +17,6 @@ contract eVote {
     uint public finishRegistartionBlockNumber;
     uint public finishVotingBlockNumber;
     uint public finishTallyBlockNumber;
-    uint public constant DEPOSIT = 1 ether;
     uint public voteResult;
     uint[] public encryptedVotesXsign = __XSIGN__;
     uint public constant pm1d2 = 10944121435919637611123202872628637544274182200208017171849102093287904247808;
@@ -30,7 +29,6 @@ contract eVote {
             uint _votingBlockInterval, 
             uint _tallyBlockInterval
         ) payable {
-        require(msg.value==DEPOSIT,"Invalid deposit value");
         vMerkleProof = verifierMerkleTree(_verifierMerkleTreeAddress);
         vzkSNARK = verifierZKSNARK(_verifierZKSNARKAddress);
         admin = msg.sender;
@@ -47,7 +45,6 @@ contract eVote {
             uint[2] memory proof_c, 
             bytes32[] memory _merkleProof
         ) public payable{
-        require(msg.value==DEPOSIT,"Invalid deposit value");
         require(block.number<finishRegistartionBlockNumber,"Registration phase is already closed");
         require(vzkSNARK.verifyProof(proof_a, proof_b, proof_c, _pubKey, 0),"Invalid DL proof");
         if (publicKeys[msg.sender][0] == 0 && publicKeys[msg.sender][1] == 0){
@@ -118,7 +115,6 @@ contract eVote {
         require(block.number >= finishTallyBlockNumber, "Invalid reclaim deposit phase");
         require(refunded[msg.sender] == false && (encryptedVotes[msg.sender][0] != 0 || msg.sender == admin),"Illegal reclaim");
         refunded[msg.sender] = true;
-        payable(msg.sender).transfer(DEPOSIT);
     }
     
 }
