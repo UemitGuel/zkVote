@@ -194,12 +194,7 @@ contract eVote is HashingHelper {
         );
 
         bytes32 formattedMessageHash = formatAndHashMessage(inputMessageHash);
-        require(
-            sender ==
-                recoverSigner(formattedMessageHash, v, bytes32(r), bytes32(s))
-        );
-
-        return true;
+        return sender == recoverSigner(formattedMessageHash, v, bytes32(r), bytes32(s));
     }
 
     function checkVoting(
@@ -222,10 +217,7 @@ contract eVote is HashingHelper {
             _Idx
         );
         bytes32 formattedMessageHash = formatAndHashMessage(inputMessageHash);
-        require(
-            sender ==
-                recoverSigner(formattedMessageHash, v, bytes32(r), bytes32(s))
-        );
+        return sender == recoverSigner(formattedMessageHash, v, bytes32(r), bytes32(s));
 
         return true;
     }
