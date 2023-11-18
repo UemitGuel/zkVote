@@ -4,7 +4,7 @@ import "./verifier_MerkleTree.sol";
 import "./verifier_zkSNARK.sol";
 import "./HashingHelper.sol";
 
-contract eVote {
+contract eVote is HashingHelper {
     verifierMerkleTree vMerkleProof;
     verifierZKSNARK vzkSNARK;
 
@@ -184,8 +184,8 @@ contract eVote {
         uint[2] memory proof_a,
         uint[2][2] memory proof_b,
         uint[2] memory proof_c
-    ) public view returns (bool) {
-        bytes32 inputMessageHash = HashingHelper.hashRegisterArguments(
+    ) public pure returns (bool) {
+        bytes32 inputMessageHash = hashRegisterArguments(
             sender,
             _pubKey,
             proof_a,
@@ -193,11 +193,10 @@ contract eVote {
             proof_c
         );
 
-        bytes32 formattedMessageHash = HashingHelper.formatAndHashMessage(
-            inputMessageHash
-        );
+        bytes32 formattedMessageHash = formatAndHashMessage(inputMessageHash);
         require(
-            sender == HashingHelper.recoverSigner(formattedMessageHash, v, r, s)
+            sender ==
+                recoverSigner(formattedMessageHash, v, bytes32(r), bytes32(s))
         );
 
         return true;
@@ -213,8 +212,8 @@ contract eVote {
         uint[2] memory proof_a,
         uint[2][2] memory proof_b,
         uint[2] memory proof_c
-    ) public view returns (bool) {
-        bytes32 inputMessageHash = HashingHelper.hashVoteArguments(
+    ) public pure returns (bool) {
+        bytes32 inputMessageHash = hashVoteArguments(
             sender,
             _encryptedVote,
             proof_a,
@@ -222,13 +221,46 @@ contract eVote {
             proof_c,
             _Idx
         );
-        bytes32 formattedMessageHash = HashingHelper.formatAndHashMessage(
-            inputMessageHash
-        );
+        bytes32 formattedMessageHash = formatAndHashMessage(inputMessageHash);
         require(
-            sender == HashingHelper.recoverSigner(formattedMessageHash, v, r, s)
+            sender ==
+                recoverSigner(formattedMessageHash, v, bytes32(r), bytes32(s))
         );
 
         return true;
+    }
+
+    function registerHash(
+        address sender,
+        uint[] memory _pubKey,
+        uint[2] memory proof_a,
+        uint[2][2] memory proof_b,
+        uint[2] memory proof_c
+    ) public pure returns (bytes32 inputMessageHash) {
+        inputMessageHash = hashRegisterArguments(
+            sender,
+            _pubKey,
+            proof_a,
+            proof_b,
+            proof_c
+        );
+    }
+
+    function votingHash(
+        address sender,
+        uint[2] memory _encryptedVote,
+        uint _Idx,
+        uint[2] memory proof_a,
+        uint[2][2] memory proof_b,
+        uint[2] memory proof_c
+    ) public pure returns (bytes32 inputMessageHash) {
+        inputMessageHash = hashVoteArguments(
+            sender,
+            _encryptedVote,
+            proof_a,
+            proof_b,
+            proof_c,
+            _Idx
+        );
     }
 }
