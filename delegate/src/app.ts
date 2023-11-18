@@ -19,10 +19,10 @@ type Poll = {
     votingDeadline: Date,
     noVotes: number,
     yesVotes: number,
+    currentId: number,
+    registeredVoters: { [key: string]: Voter },
 }
 let currentPoll: Poll | undefined;
-let registeredVoters: { [key: string]: Voter } = {};
-let currentId = 0;
 
 type StageDeadlines = {
     registration: string,
@@ -56,12 +56,15 @@ app.post('/create_poll', (req: Request, res: Response) => {
         votingDeadline: new Date(Date.now() + votingRelativeDeadline),
         noVotes: 0,
         yesVotes: 0,
+        currentId: 0,
+        registeredVoters: {},
     };
     res.status(200).json({ success: true });
 });
 
 app.post('/delete_poll', (req: Request, res: Response) => {
     currentPoll = undefined;
+    res.status(200).json({ success: true });
 });
 
 // API endpoint to get vote status
@@ -89,15 +92,15 @@ app.get('/vote_status/:user_address', (req: Request, res: Response) => {
             poll_question: pollQuestion,
             no_hash_to_sign: noHash,
             yes_hash_to_sign: yesHash,
-            deadlines: deadlineForEachStage,
         });
 
     } else if (voteStatus === "Ended") {
+        console.log("Vote has ended:", currentPoll);
         res.json({
             vote_status: voteStatus,
             poll_question: pollQuestion,
-            no_votes: currentPoll ? currentPoll.noVotes : 0,
-            yes_votes: currentPoll ? currentPoll.yesVotes : 0,
+            no_votes: currentPoll?.noVotes,
+            yes_votes: currentPoll?.yesVotes,
             deadlines: deadlineForEachStage,
         });
     } else {
@@ -128,7 +131,7 @@ app.post('/register_voter', (req: Request, res: Response) => {
         res.status(400).json({ error: "Registration has ended" });
         return;
     }
-    if(registeredVoters[user_address]) {
+    if(currentPoll.registeredVoters[user_address]) {
         res.status(400).json({ error: "User is already registered" });
         return;
     }
@@ -163,11 +166,11 @@ app.post('/cast_vote', (req: Request, res: Response) => {
         res.status(400).json({ error: "Poll is not in voting state" });
         return;
     }
-    if(!registeredVoters[user_address]) {
+    if(!currentPoll.registeredVoters[user_address]) {
         res.status(400).json({ error: "User is not registered" });
         return;
     }
-    if(registeredVoters[user_address].state === "Voted") {
+    if(currentPoll.registeredVoters[user_address].state === "Voted") {
         res.status(400).json({ error: "User has already voted" });
         return;
     }
@@ -183,14 +186,15 @@ function getVoteStatus(userAddress: string): string {
     }
     let pollStatus = getPollStatus(currentPoll);
     if(pollStatus === "Registration") {
-        if (registeredVoters[userAddress]) {
+        if (currentPoll.registeredVoters[userAddress]) {
             return "Registered";
         } else {
             return "CanRegister";
         }
     } else if(pollStatus === "Voting") {
-        if (registeredVoters[userAddress]) {
-            if (registeredVoters[userAddress].state === "Voted") {
+        console.log("Poll State is voting");
+        if (currentPoll.registeredVoters[userAddress]) {
+            if (currentPoll.registeredVoters[userAddress].state === "Voted") {
                 return "Voted";
             }
             return "CanVote";
@@ -221,8 +225,14 @@ function getPollStatus(poll: Poll): string {
 
 // Helper function to register a voter
 function registerVoter(userAddress: string, registrationHash: string): number {
-    let id = currentId++;
-    registeredVoters[userAddress] = {
+    if(!currentPoll) {
+        throw new Error("No poll is currently active");
+    }
+    let id = currentPoll.currentId++;
+    if(!currentPoll) {
+        throw new Error("No poll is currently active");
+    }
+    currentPoll.registeredVoters[userAddress] = {
         userAddress,
         state: "Registered",
         id,
@@ -234,33 +244,34 @@ function registerVoter(userAddress: string, registrationHash: string): number {
 // Helper function to cast a vote
 function castVote(userAddress: string, signedHash: string, vote: string, id: string) {
     if(!currentPoll) {
-        return { Err: "No poll is currently active" };
+        throw new Error("No poll is currently active");
     }
-    if(!registeredVoters[userAddress]) {
-        return { Err: "User is not registered" };
+    if(!currentPoll.registeredVoters[userAddress]) {
+        throw new Error("User is not registered");
     }
-    if(registeredVoters[userAddress].state === "Voted") {
-        return { Err: "User has already voted" };
+    if(currentPoll.registeredVoters[userAddress].state === "Voted") {
+        throw new Error("User has already voted");
     }
-    if(registeredVoters[userAddress].id !== parseInt(id)) {
-        return { Err: "Invalid ID" };
+    if(currentPoll.registeredVoters[userAddress].id !== parseInt(id)) {
+        throw new Error("Invalid id");
     }
-    if(registeredVoters[userAddress].registrationHash !== signedHash) {
-        return { Err: "Invalid registration hash" };
+    if(currentPoll.registeredVoters[userAddress].registrationHash !== signedHash) {
+        throw new Error("Invalid registration hash");
     }
     if(vote !== "Yes" && vote !== "No") {
-        return { Err: "Invalid vote" };
+        throw new Error("Invalid vote");
     }
     if(getPollStatus(currentPoll) !== "Voting") {
-        return { Err: "Voting has ended" };
+        throw new Error("Poll is not in voting state");
     }
     if(vote === "Yes") {
         currentPoll.yesVotes++;
     } else {
         currentPoll.noVotes++;
     }
-    registeredVoters[userAddress].state = "Voted";
-    registeredVoters[userAddress].voteHash = signedHash;
+    console.log("CurrentPoll after vote: ", currentPoll);
+    currentPoll.registeredVoters[userAddress].state = "Voted";
+    currentPoll.registeredVoters[userAddress].voteHash = signedHash;
     return;
 }
 
