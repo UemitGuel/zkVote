@@ -14,6 +14,7 @@ type Voter = {
 }
 type Poll = {
     question: string,
+    currentStage?: "Registration" | "Voting" | "Ended",
     registrationDeadline: Date,
     votingDeadline: Date,
     noVotes: number,
@@ -27,6 +28,23 @@ type StageDeadlines = {
     registration: string,
     voting: string,
 }
+
+app.post('/set_stage', (req: Request, res: Response) => {
+    const { stage } = req.body;
+
+    if(["Registration", "Voting", "Ended"].indexOf(stage) === -1) {
+        res.status(400).json({ error: "Invalid stage" });
+        return;
+    }
+    if(!currentPoll) {
+        res.status(400).json({ error: "No poll is currently active" });
+        return;
+    }
+
+    currentPoll.currentStage = stage;
+
+    res.status(200).json({ success: true });
+});
 
 app.post('/create_poll', (req: Request, res: Response) => {
     const { question } = req.body;
@@ -175,13 +193,20 @@ function getVoteStatus(userAddress: string): string {
 
 function getPollStatus(poll: Poll): string {
     let now = new Date();
+    let calculated_stage;
     if (now < new Date(poll.registrationDeadline)) {
-        return "Registration";
+        calculated_stage =  "Registration";
     } else if (now < new Date(poll.votingDeadline)) {
-        return "Voting";
+        calculated_stage =  "Voting";
     } else {
-        return "Ended";
+        calculated_stage = "Ended";
     }
+
+    // Overwrite calculated stage if stage on object is set to something else
+    if (currentPoll?.currentStage) {
+        return currentPoll?.currentStage;
+    }
+    return calculated_stage;
 }
 
 // Helper function to register a voter
