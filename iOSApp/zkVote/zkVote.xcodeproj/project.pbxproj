@@ -11,6 +11,9 @@
 		B627559C2B089CFB00244379 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B627559B2B089CFB00244379 /* ContentView.swift */; };
 		B627559E2B089CFC00244379 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B627559D2B089CFC00244379 /* Assets.xcassets */; };
 		B62755A22B089CFC00244379 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B62755A12B089CFC00244379 /* Preview Assets.xcassets */; };
+		B62755E72B08A8BC00244379 /* metamask-ios-sdk in Frameworks */ = {isa = PBXBuildFile; productRef = B62755E62B08A8BC00244379 /* metamask-ios-sdk */; };
+		B62755E92B08A8D800244379 /* ConnectionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62755E82B08A8D800244379 /* ConnectionManager.swift */; };
+		B62755EB2B08A9E700244379 /* RegisteredForVote.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62755EA2B08A9E700244379 /* RegisteredForVote.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -20,6 +23,8 @@
 		B627559D2B089CFC00244379 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B627559F2B089CFC00244379 /* zkVote.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = zkVote.entitlements; sourceTree = "<group>"; };
 		B62755A12B089CFC00244379 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		B62755E82B08A8D800244379 /* ConnectionManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConnectionManager.swift; sourceTree = "<group>"; };
+		B62755EA2B08A9E700244379 /* RegisteredForVote.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisteredForVote.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -27,6 +32,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B62755E72B08A8BC00244379 /* metamask-ios-sdk in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -54,9 +60,11 @@
 			children = (
 				B62755992B089CFB00244379 /* zkVoteApp.swift */,
 				B627559B2B089CFB00244379 /* ContentView.swift */,
+				B62755E82B08A8D800244379 /* ConnectionManager.swift */,
 				B627559D2B089CFC00244379 /* Assets.xcassets */,
 				B627559F2B089CFC00244379 /* zkVote.entitlements */,
 				B62755A02B089CFC00244379 /* Preview Content */,
+				B62755EA2B08A9E700244379 /* RegisteredForVote.swift */,
 			);
 			path = zkVote;
 			sourceTree = "<group>";
@@ -85,6 +93,9 @@
 			dependencies = (
 			);
 			name = zkVote;
+			packageProductDependencies = (
+				B62755E62B08A8BC00244379 /* metamask-ios-sdk */,
+			);
 			productName = zkVote;
 			productReference = B62755962B089CFB00244379 /* zkVote.app */;
 			productType = "com.apple.product-type.application";
@@ -113,6 +124,9 @@
 				Base,
 			);
 			mainGroup = B627558D2B089CFB00244379;
+			packageReferences = (
+				B62755E52B08A8BC00244379 /* XCRemoteSwiftPackageReference "metamask-ios-sdk" */,
+			);
 			productRefGroup = B62755972B089CFB00244379 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -140,6 +154,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				B627559C2B089CFB00244379 /* ContentView.swift in Sources */,
+				B62755EB2B08A9E700244379 /* RegisteredForVote.swift in Sources */,
+				B62755E92B08A8D800244379 /* ConnectionManager.swift in Sources */,
 				B627559A2B089CFB00244379 /* zkVoteApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -359,6 +375,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		B62755E52B08A8BC00244379 /* XCRemoteSwiftPackageReference "metamask-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/MetaMask/metamask-ios-sdk";
+			requirement = {
+				kind = exactVersion;
+				version = 0.2.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		B62755E62B08A8BC00244379 /* metamask-ios-sdk */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B62755E52B08A8BC00244379 /* XCRemoteSwiftPackageReference "metamask-ios-sdk" */;
+			productName = "metamask-ios-sdk";
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = B627558E2B089CFB00244379 /* Project object */;
 }
