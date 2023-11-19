@@ -18,6 +18,8 @@ Using following commands:
 - `cd scripts`
 - `truffle exec deploy.js --network linea_testnet`
 - `truffle exec register.js [userId] --network linea_testnet`
+- `truffle exec castVote.js [userId] [true/false] --network linea_testnet`
+- `truffle exec tally.js --network linea_testnet`
 
 See the smart contract address at [Blockscout](https://explorer.goerli.linea.build/address/0x381f7b4AE7B5c133c551518b7A5376C370A41E6F).
 ```
