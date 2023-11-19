@@ -205,11 +205,11 @@ library ECDSA {
         if (error == RecoverError.NoError) {
             return; // no error: do nothing
         } else if (error == RecoverError.InvalidSignature) {
-            revert ECDSAInvalidSignature();
+            // revert ECDSAInvalidSignature();
         } else if (error == RecoverError.InvalidSignatureLength) {
-            revert ECDSAInvalidSignatureLength(uint256(errorArg));
+            // revert ECDSAInvalidSignatureLength(uint256(errorArg));
         } else if (error == RecoverError.InvalidSignatureS) {
-            revert ECDSAInvalidSignatureS(errorArg);
+            // revert ECDSAInvalidSignatureS(errorArg);
         }
     }
 }

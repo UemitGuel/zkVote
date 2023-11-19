@@ -14,12 +14,12 @@ contract eVote is HashingHelper {
     mapping(address => bool) public refunded;
     address[] public voters;
     uint public constant nVoters = 3;
+    uint[] public encryptedVotesXsign = [0];
     bytes32 public usersMerkleTreeRoot;
     uint public finishRegistartionBlockNumber;
     uint public finishVotingBlockNumber;
     uint public finishTallyBlockNumber;
     uint public voteResult;
-    uint[] public encryptedVotesXsign = [0];
     uint public constant pm1d2 =
         10944121435919637611123202872628637544274182200208017171849102093287904247808;
 
@@ -55,10 +55,10 @@ contract eVote is HashingHelper {
         uint[2] memory proof_c,
         bytes32[] memory _merkleProof
     ) public payable {
-        require(
-            block.number < finishRegistartionBlockNumber,
-            "Registration phase is already closed"
-        );
+        // require(
+        //     block.number < finishRegistartionBlockNumber,
+        //     "Registration phase is already closed"
+        // );
         require(
             vzkSNARK.verifyProof(proof_a, proof_b, proof_c, _pubKey, 0),
             "Invalid DL proof"
@@ -94,11 +94,11 @@ contract eVote is HashingHelper {
         uint[2][2] memory proof_b,
         uint[2] memory proof_c
     ) public {
-        require(
-            block.number >= finishRegistartionBlockNumber &&
-                block.number < finishVotingBlockNumber,
-            "Voting phase is already closed"
-        );
+        // require(
+        //     block.number >= finishRegistartionBlockNumber &&
+        //         block.number < finishVotingBlockNumber,
+        //     "Voting phase is already closed"
+        // );
         require(sender == voters[_Idx], "Unregistered voter");
 
         checkVoting(
@@ -145,11 +145,11 @@ contract eVote is HashingHelper {
         uint[2] memory proof_c
     ) public {
         require(msg.sender == admin, "Only admin can set the tally result");
-        require(
-            block.number >= finishVotingBlockNumber &&
-                block.number < finishTallyBlockNumber,
-            "Tallying phase is already closed"
-        );
+        // require(
+        //     block.number >= finishVotingBlockNumber &&
+        //         block.number < finishTallyBlockNumber,
+        //     "Tallying phase is already closed"
+        // );
 
         uint[] memory _publicSignals = new uint[](
             nVoters + encryptedVotesXsign.length + 1
@@ -194,12 +194,7 @@ contract eVote is HashingHelper {
         );
 
         bytes32 formattedMessageHash = formatAndHashMessage(inputMessageHash);
-        require(
-            sender ==
-                recoverSigner(formattedMessageHash, v, bytes32(r), bytes32(s))
-        );
-
-        return true;
+        return sender == recoverSigner(formattedMessageHash, v, bytes32(r), bytes32(s));
     }
 
     function checkVoting(
@@ -222,12 +217,7 @@ contract eVote is HashingHelper {
             _Idx
         );
         bytes32 formattedMessageHash = formatAndHashMessage(inputMessageHash);
-        require(
-            sender ==
-                recoverSigner(formattedMessageHash, v, bytes32(r), bytes32(s))
-        );
-
-        return true;
+        return sender == recoverSigner(formattedMessageHash, v, bytes32(r), bytes32(s));
     }
 
     function registerHash(
