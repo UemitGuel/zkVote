@@ -33,6 +33,34 @@ async function genEncryptedVote(inputs) {
     return {genWitnessTime, genProofTime, proof, publicSignals}
 }
 
+async function genEncryptedVoteAndProof(voters, VotingKeysX, VotingKeysY){
+    let genWitnessTimeAll = 0;
+    let genProofTimeAll = 0;
+
+    for (i=0; i<voters.length; i++){
+        inputs = { "VotingKeysX": VotingKeysX,
+            "VotingKeysY": VotingKeysY,
+            "Idx": voters[i].Idx,
+            "xi": voters[i].privateKey,
+            "vote": voters[i].Vote
+        }
+        var {genWitnessTime, genProofTime, proof, publicSignals} = await genEncryptedVote(inputs)
+        genWitnessTimeAll += genWitnessTime
+        genProofTimeAll +=genProofTime 
+        voters[i].encryptedVote = [publicSignals[0], publicSignals[1]]
+        const encryptedVoteProof = {
+            a: [proof.pi_a[0], proof.pi_a[1]],
+            b: [
+                [proof.pi_b[0][1], proof.pi_b[0][0]],
+                [proof.pi_b[1][1], proof.pi_b[1][0]],
+              ],
+            c: [proof.pi_c[0], proof.pi_c[1]]
+        } 
+        voters[i].encryptedVoteProof = encryptedVoteProof
+    }
+    console.log(`encryptedVoteGen_genWitnessTime = ${genWitnessTimeAll/voters.length} ms, encryptedVoteGen_genProofTime = ${genProofTimeAll/voters.length} ms`)
+
+}
 
 async function genPublicKeysAndProofs(count) {
     const babyJub = await buildBabyjub();
@@ -122,6 +150,7 @@ module.exports = {
     genTestData,
     genPublicKeysAndProofs,
     genEncryptedVotesAndProofs,
+    genEncryptedVoteAndProof,
     genPublicKey,
     genEncryptedVote
 }
