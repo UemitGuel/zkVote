@@ -13,7 +13,13 @@ Project strucutre:
 # Deployment
 
 The smart contracts have been deployed on the Goerli Linea Network
+Using following commands:
+- `truffle migrate --network linea_testnet`
+- `cd scripts`
+- `truffle exec deploy.js --network linea_testnet`
+- `truffle exec register.js [userId] --network linea_testnet`
 
+See the smart contract address at [Blockscout](https://explorer.goerli.linea.build/address/0x381f7b4AE7B5c133c551518b7A5376C370A41E6F).
 ```
 2_deploy_contracts_migration.js
 ===============================
@@ -27,71 +33,71 @@ The smart contracts have been deployed on the Goerli Linea Network
 
    Replacing 'Migrations'
    ----------------------
-   > transaction hash:    0x100cd68f12ba17ca9fa766cae2d670aa15fde5feb06d2ccc257ac26c3820908b
+   > transaction hash:    0xbc6837bfd283fd852aed1cbaf052e060545495a5d8c1c25358a97aba755fd587
    > Blocks: 2            Seconds: 8
-   > contract address:    0x02F5059A085D40E045f0384C4456eaf50437fb2B
-   > block number:        2054883
-   > block timestamp:     1700342331
+   > contract address:    0x84a91a53A324313D4B380567F0d5d66D76008735
+   > block number:        2056532
+   > block timestamp:     1700352239
    > account:             0x0DEc08649851BcF0Aa441Bff25cf54CBd2A2cc95
-   > balance:             0.499002214997206202
+   > balance:             0.46445484990047358
    > gas used:            176717 (0x2b24d)
    > gas price:           2.500000007 gwei
    > value sent:          0 ETH
    > total cost:          0.000441792501237019 ETH
 
 
-   Deploying 'verifierMerkleTree'
+   Replacing 'verifierMerkleTree'
    ------------------------------
-   > transaction hash:    0x32593cbe99c6d09d3011758355711d05f8fa9143258235a8395853dd5cea610d
-   > Blocks: 2            Seconds: 9
-   > contract address:    0x26a1EfF203200576029D8BdEaD5f295dC577E4F6
-   > block number:        2054886
-   > block timestamp:     1700342349
+   > transaction hash:    0x01ecbbcda5708b7b99d59dfb1d9a6c0df335c726cd1b739dc804900115652653
+   > Blocks: 1            Seconds: 4
+   > contract address:    0x98140140FDaF699E2E9F9DfEc86eBACd96dD9fb6
+   > block number:        2056534
+   > block timestamp:     1700352251
    > account:             0x0DEc08649851BcF0Aa441Bff25cf54CBd2A2cc95
-   > balance:             0.498522152495862027
+   > balance:             0.463974787399129405
    > gas used:            192025 (0x2ee19)
    > gas price:           2.500000007 gwei
    > value sent:          0 ETH
    > total cost:          0.000480062501344175 ETH
 
 
-   Deploying 'verifierZKSNARK'
+   Replacing 'verifierZKSNARK'
    ---------------------------
-   > transaction hash:    0x4d16c1013f3292a66ec78b80c3fe684191df8769d9f195c16c74be8b46821cb8
-   > Blocks: 2            Seconds: 13
-   > contract address:    0x7F18de2ae049d22b3a76E09da4938EE6f1e8C705
-   > block number:        2054889
-   > block timestamp:     1700342367
+   > transaction hash:    0xce391ca121c9a9ccb8e0b758344c3e7b9946a5c8f5d825cb4a7ee2e8289fae80
+   > Blocks: 1            Seconds: 4
+   > contract address:    0x50A63c61407cce42beeC7C5a904160192B0093b7
+   > block number:        2056536
+   > block timestamp:     1700352263
    > account:             0x0DEc08649851BcF0Aa441Bff25cf54CBd2A2cc95
-   > balance:             0.495153514986429842
+   > balance:             0.46060614988969722
    > gas used:            1347455 (0x148f7f)
    > gas price:           2.500000007 gwei
    > value sent:          0 ETH
    > total cost:          0.003368637509432185 ETH
 
 
-   Deploying 'eVote'
+   Replacing 'eVote'
    -----------------
-   > transaction hash:    0x1541972b0edec1a9f53e726905cb2cdbb84148809b8874f40025945d478719a6
+   > transaction hash:    0x8ad06839cdf840754aad458ecb99bac523f0791aadce3c9de30f57ac57378424
    > Blocks: 2            Seconds: 8
-   > contract address:    0x9F9AFd00D382860b90698769e1Fb467592757d63
-   > block number:        2054892
-   > block timestamp:     1700342385
+   > contract address:    0x381f7b4AE7B5c133c551518b7A5376C370A41E6F
+   > block number:        2056538
+   > block timestamp:     1700352275
    > account:             0x0DEc08649851BcF0Aa441Bff25cf54CBd2A2cc95
-   > balance:             0.490539157473509641
-   > gas used:            1845743 (0x1c29ef)
+   > balance:             0.456074679877009104
+   > gas used:            1812588 (0x1ba86c)
    > gas price:           2.500000007 gwei
    > value sent:          0 ETH
-   > total cost:          0.004614357512920201 ETH
+   > total cost:          0.004531470012688116 ETH
 
    > Saving migration to chain.
    > Saving artifacts
    -------------------------------------
-   > Total cost:     0.00890485002493358 ETH
+   > Total cost:     0.008821962524701495 ETH
 
 Summary
 =======
 > Total deployments:   5
-> Final cost:          0.009346642526170599 ETH
+> Final cost:          0.009263755025938514 ETH
 
 ```
