@@ -14,12 +14,12 @@ contract eVote is HashingHelper {
     mapping(address => bool) public refunded;
     address[] public voters;
     uint public constant nVoters = __NVOTERS__;
+    uint[] public encryptedVotesXsign = __XSIGN__;
     bytes32 public usersMerkleTreeRoot;
     uint public finishRegistartionBlockNumber;
     uint public finishVotingBlockNumber;
     uint public finishTallyBlockNumber;
     uint public voteResult;
-    uint[] public encryptedVotesXsign = __XSIGN__;
     uint public constant pm1d2 =
         10944121435919637611123202872628637544274182200208017171849102093287904247808;
 
