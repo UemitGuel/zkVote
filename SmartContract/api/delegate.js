@@ -1,9 +1,3 @@
-const {
-    genPublicKeysAndProofs,
-    genEncryptedVotesAndProofs,
-} = require('../helper/voters')
-
-const { hashFunctionArguments } = require('./ERC4337.js')
 const { MerkleTree } = require('../helper/merkletree.js')
 
 // return Promise<string[]>
