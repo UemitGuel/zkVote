@@ -12,11 +12,13 @@
   "author": "Muhammad ElSheikh",
   "license": "ISC",
   "dependencies": {
-    "ganache-time-traveler": "^1.0.16",
-    "web3": "^1.6.1",
+    "@truffle/hdwallet-provider": "^2.1.15",
     "circomlib": "^2.0.2",
     "circomlibjs": "^0.1.1",
+    "ethereumjs-util": "^7.1.5",
+    "ethers": "^6.8.1",
+    "ganache-time-traveler": "^1.0.16",
     "snarkjs": "^0.4.10",
-    "ethereumjs-util":"^5.1.4"
+    "web3": "^1.6.1"
   }
 }
